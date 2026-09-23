@@ -1,0 +1,205 @@
+---
+title: "Exploratory Analysis of Daily Screen Time, Study Habits, and Academic Performance Among College Students"
+author: "Samariya Yuvraj Harishbhai"
+date: "2026-09-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+In this project, we are studying how daily screen time and study hours affect the exam performance of college students. Many students spend long hours on phones or laptops, which directly impacts their study routine and grades.
+
+Objectives of this analysis:
+- Create and import a dataset of student study habits into R.
+- Clean and prepare the data for analysis.
+- Calculate basic statistical values like mean, median, variance, and standard deviation.
+- Visualize the data using pie charts, bar charts, and scatter plots.
+- Understand the relationship between screen usage and exam marks.
+
+---
+
+## 1. Data Creation and Importing
+
+We create a dataset containing records of 10 students including their names, device type, screen hours, study hours, exam score, and performance level. We first save this as a CSV file and then read it into R using `read.csv()`.
+
+```{r data_import}
+# Creating the student habits dataset
+student_records <- data.frame(
+  StudentID = 201:210,
+  Name = c("Yuvraj", "Tanvi", "Kabir", "Sneha", "Harsh", 
+           "Kavya", "Varun", "Riya", "Dev", "Ishita"),
+  Device_Used = c("Laptop", "Smartphone", "Tablet", "Laptop", "Smartphone", 
+                  "Laptop", "Smartphone", "Tablet", "Smartphone", "Laptop"),
+  Daily_Screen_Time = c(3.5, 7.0, 4.5, 2.5, 8.0, 3.0, 6.5, 5.0, 7.5, 4.0),
+  Daily_Study_Hours = c(5.0, 2.0, 3.5, 6.0, 1.5, 5.5, 2.5, 3.0, 1.5, 4.5),
+  Exam_Score = c(88, 52, 75, 94, 45, 90, 60, 70, 48, 82),
+  Performance_Level = c("High", "Low", "Average", "High", "Low", 
+                        "High", "Average", "Average", "Low", "High")
+)
+
+# Saving the data to a CSV file
+write.csv(student_records, "student_habits_data.csv", row.names = FALSE)
+
+# Reading the CSV file back into R
+habits_df <- read.csv("student_habits_data.csv")
+
+# Display the first few records
+head(habits_df)
+```
+
+**Explanation:**  
+We created a data frame in R with 10 student rows. Using `write.csv()`, we exported the data to our working folder, and then imported it back using `read.csv()`. `head()` is used to inspect the imported rows.
+
+---
+
+## 2. Data Preprocessing and Cleaning
+
+Before doing calculations, we check the structure of our variables, check if there are any missing values, and convert text columns into factors.
+
+```{r data_cleaning}
+# Checking data structure
+str(habits_df)
+
+# Checking for missing values
+colSums(is.na(habits_df))
+
+# Converting categorical columns to factor
+habits_df$Device_Used <- as.factor(habits_df$Device_Used)
+habits_df$Performance_Level <- factor(
+  habits_df$Performance_Level, 
+  levels = c("Low", "Average", "High")
+)
+
+# Checking summary of factors
+summary(habits_df[, c("Device_Used", "Performance_Level")])
+```
+
+**Explanation:**  
+`str()` shows the data type of each column. `colSums(is.na())` verifies whether any value is missing (all are 0 here). `as.factor()` and `factor()` convert character data into category levels so that R can group them easily.
+
+---
+
+## 3. Statistical Exploration
+
+Here we calculate descriptive statistics for the exam scores, study hours, and daily screen time using standard functions.
+
+```{r statistics}
+# Mean and Median of Exam Score
+mean(habits_df$Exam_Score)
+median(habits_df$Exam_Score)
+
+# Variance and Standard Deviation of Exam Score
+var(habits_df$Exam_Score)
+sd(habits_df$Exam_Score)
+
+# Mean and SD for Screen Time and Study Hours
+mean(habits_df$Daily_Screen_Time)
+sd(habits_df$Daily_Screen_Time)
+
+mean(habits_df$Daily_Study_Hours)
+sd(habits_df$Daily_Study_Hours)
+```
+
+**Explanation:**  
+We used `mean()` to find the central average mark and `median()` for the middle value. `var()` and `sd()` are calculated to see the spread and variability in exam marks and study patterns.
+
+---
+
+## 4. Graph and Plot Creation
+
+### A. Device Usage and Performance Distribution (Pie Charts)
+
+```{r pie_charts, fig.width=9, fig.height=5}
+par(mfrow = c(1, 2))
+
+# Pie Chart 1: Primary Device
+device_counts <- table(habits_df$Device_Used)
+pie(
+  device_counts,
+  main = "Primary Device Used by Students",
+  col = c("#74b9ff", "#55efc4", "#ffeaa7"),
+  labels = paste0(names(device_counts), " (", device_counts, ")")
+)
+
+# Pie Chart 2: Performance Levels
+perf_counts <- table(habits_df$Performance_Level)
+pie(
+  perf_counts,
+  main = "Student Performance Level",
+  col = c("#ff7675", "#fdcb6e", "#00b894"),
+  labels = paste0(names(perf_counts), " (", perf_counts, ")")
+)
+```
+
+### B. Daily Screen Time and Exam Scores (Bar Charts)
+
+```{r bar_charts, fig.width=8, fig.height=5}
+par(mfrow = c(1, 1), mar = c(6, 4, 3, 1))
+
+# Bar Chart 1: Screen Time per Student
+barplot(
+  habits_df$Daily_Screen_Time,
+  names.arg = habits_df$Name,
+  main = "Daily Screen Time per Student",
+  ylab = "Hours per Day",
+  col = "#0984e3",
+  las = 2,
+  ylim = c(0, 10)
+)
+abline(h = mean(habits_df$Daily_Screen_Time), col = "red", lty = 2, lwd = 2)
+
+# Bar Chart 2: Exam Score per Student
+barplot(
+  habits_df$Exam_Score,
+  names.arg = habits_df$Name,
+  main = "Exam Score per Student",
+  ylab = "Score (out of 100)",
+  col = "#00cec9",
+  las = 2,
+  ylim = c(0, 100)
+)
+abline(h = 50, col = "darkred", lty = 2, lwd = 1.5) # Pass line
+abline(h = mean(habits_df$Exam_Score), col = "darkblue", lty = 3, lwd = 2) # Average line
+```
+
+### C. Relationship Between Study Hours and Exam Score (Scatter Plot)
+
+```{r scatter_plot, fig.width=7, fig.height=5}
+plot(
+  habits_df$Daily_Study_Hours,
+  habits_df$Exam_Score,
+  main = "Daily Study Hours vs Exam Score",
+  xlab = "Study Hours per Day",
+  ylab = "Exam Score",
+  pch = 19,
+  col = "#6c5ce7",
+  cex = 1.5
+)
+abline(lm(Exam_Score ~ Daily_Study_Hours, data = habits_df), col = "red", lwd = 2)
+grid()
+```
+
+**Explanation:**  
+- `pie()` shows the breakdown of devices and performance categories.
+- `barplot()` compares each student's screen hours and exam marks, with reference lines added via `abline()`.
+- `plot()` with `lm()` displays how marks increase as study hours increase.
+
+---
+
+## 5. Interpretation of Results
+
+1. **Screen Time Impact:** Students with screen time above 6.5 hours (like Harsh, Dev, and Tanvi) scored below 55 marks.
+2. **Study Hours Impact:** Students who study 4.5 hours or more (like Yuvraj, Sneha, and Kavya) achieved scores above 85 marks.
+3. **Trend Line:** The upward trend line in the scatter plot shows a clear positive relationship between regular study hours and higher exam marks.
+
+---
+
+## 6. Findings and Conclusion
+
+- **Finding 1:** High non-academic screen time is associated with lower exam marks.
+- **Finding 2:** 4 to 6 hours of daily focused study is consistent among top-performing students.
+- **Conclusion:** Students should manage and reduce unnecessary phone or laptop time and allocate fixed hours for self-study to improve their academic results.
